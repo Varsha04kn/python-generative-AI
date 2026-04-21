@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-header">
+    <h1>💡 Smart Suggestions</h1>
+    <span class="subtitle">AI-powered buying patterns</span>
+</div>
+
+{% if suggestions %}
+<div class="alerts-list">
+    {% for s in suggestions %}
+    <div class="alert-card" style="border-color:var(--primary)">
+        <span class="alert-icon">🤖</span>
+        <div class="alert-body">
+            <p>{{ s.suggestion }}</p>
+            <small>
+                Avg usage: <b>{{ s.avg_per_day }} {{ s.unit }}/day</b>
+                {% if s.days_left %} · Stock lasts: <b>~{{ s.days_left }} days</b>{% endif %}
+                {% if s.reorder_cycle %} · Reorder cycle: <b>every {{ s.reorder_cycle }} days</b>{% endif %}
+            </small>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <i class="fas fa-database"></i>
+    <p>Not enough usage data yet. Use items to generate suggestions.</p>
+</div>
+{% endif %}
+{% endblock %}

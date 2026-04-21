@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartStock AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-brand">📦 SmartStock AI</div>
+    <div class="nav-links">
+        <a href="/" class="nav-link"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="/inventory" class="nav-link"><i class="fas fa-boxes"></i> Inventory</a>
+        <a href="/analytics" class="nav-link"><i class="fas fa-chart-bar"></i> Analytics</a>
+        <a href="/alerts" class="nav-link"><i class="fas fa-bell"></i> Alerts</a>
+        <a href="/reorder" class="nav-link"><i class="fas fa-cart-plus"></i> Reorder</a>
+        <a href="/suggestions" class="nav-link"><i class="fas fa-lightbulb"></i> Suggestions</a>
+        <a href="/locations" class="nav-link"><i class="fas fa-map-marker-alt"></i> Locations</a>
+        <a href="/export/csv" class="nav-link"><i class="fas fa-download"></i> Export</a>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
+</nav>
+
+<div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for cat, msg in messages %}
+        <div class="alert alert-{{ cat }}">{{ msg }}</div>
+        {% endfor %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+</div>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

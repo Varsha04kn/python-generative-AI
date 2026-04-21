@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-header"><h1>📊 Analytics</h1></div>
+
+<div class="charts-grid">
+    <div class="chart-card">
+        <h3>📅 Weekly Usage</h3>
+        <canvas id="weeklyChart"></canvas>
+    </div>
+    <div class="chart-card">
+        <h3>🗂️ Items by Category</h3>
+        <canvas id="catChart"></canvas>
+    </div>
+</div>
+
+<div class="charts-grid">
+    <div class="chart-card">
+        <h3>🔥 Most Used Items</h3>
+        <canvas id="mostChart"></canvas>
+    </div>
+    <div class="chart-card">
+        <h3>🧊 Least Used Items</h3>
+        <canvas id="leastChart"></canvas>
+    </div>
+</div>
+
+<script>
+const colors = ['#6c63ff','#ff6584','#43e97b','#f7971e','#4facfe'];
+
+new Chart(document.getElementById('weeklyChart'), {
+    type: 'bar',
+    data: {
+        labels: {{ weekly_labels|safe }},
+        datasets: [{ label: 'Units Used', data: {{ weekly_data|safe }},
+            backgroundColor: 'rgba(108,99,255,0.7)', borderRadius: 6 }]
+    },
+    options: { responsive: true, plugins: { legend: { labels: { color: 'var(--text)' } } },
+        scales: { x: { ticks: { color: 'var(--text)' } }, y: { ticks: { color: 'var(--text)' } } } }
+});
+
+new Chart(document.getElementById('catChart'), {
+    type: 'doughnut',
+    data: {
+        labels: {{ cat_labels|safe }},
+        datasets: [{ data: {{ cat_data|safe }}, backgroundColor: colors }]
+    },
+    options: { responsive: true, plugins: { legend: { labels: { color: 'var(--text)' } } } }
+});
+
+new Chart(document.getElementById('mostChart'), {
+    type: 'bar',
+    data: {
+        labels: {{ most_used|map(attribute='name')|list|tojson }},
+        datasets: [{ label: 'Total Used', data: {{ most_used|map(attribute='total')|list|tojson }},
+            backgroundColor: '#43e97b', borderRadius: 6 }]
+    },
+    options: { indexAxis: 'y', responsive: true,
+        plugins: { legend: { labels: { color: 'var(--text)' } } },
+        scales: { x: { ticks: { color: 'var(--text)' } }, y: { ticks: { color: 'var(--text)' } } } }
+});
+
+new Chart(document.getElementById('leastChart'), {
+    type: 'bar',
+    data: {
+        labels: {{ least_used|map(attribute='name')|list|tojson }},
+        datasets: [{ label: 'Total Used', data: {{ least_used|map(attribute='total')|list|tojson }},
+            backgroundColor: '#ff6584', borderRadius: 6 }]
+    },
+    options: { indexAxis: 'y', responsive: true,
+        plugins: { legend: { labels: { color: 'var(--text)' } } },
+        scales: { x: { ticks: { color: 'var(--text)' } }, y: { ticks: { color: 'var(--text)' } } } }
+});
+</script>
+{% endblock %}

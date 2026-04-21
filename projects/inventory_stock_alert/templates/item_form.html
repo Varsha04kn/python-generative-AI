@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-header">
+    <h1>{{ '✏️ Edit Item' if item else '➕ Add Item' }}</h1>
+    <a href="/inventory" class="btn-secondary">← Back</a>
+</div>
+
+<div class="form-card">
+    <form method="POST">
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Item Name *</label>
+                <input type="text" name="name" class="input" required value="{{ item.name if item else '' }}">
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                <input type="text" name="category" class="input" list="cat-list"
+                       value="{{ item.category if item else 'General' }}">
+                <datalist id="cat-list">
+                    <option value="Food"><option value="Electronics"><option value="Automotive">
+                    <option value="Cleaning"><option value="Medical"><option value="General">
+                </datalist>
+            </div>
+            <div class="form-group">
+                <label>Quantity *</label>
+                <input type="number" name="quantity" class="input" step="0.01" required
+                       value="{{ item.quantity if item else '' }}">
+            </div>
+            <div class="form-group">
+                <label>Unit</label>
+                <input type="text" name="unit" class="input" list="unit-list"
+                       value="{{ item.unit if item else 'units' }}">
+                <datalist id="unit-list">
+                    <option value="units"><option value="kg"><option value="liters">
+                    <option value="pcs"><option value="boxes"><option value="grams">
+                </datalist>
+            </div>
+            <div class="form-group">
+                <label>Min Stock (Alert Threshold)</label>
+                <input type="number" name="min_stock" class="input" step="0.01"
+                       value="{{ item.min_stock if item else '5' }}">
+            </div>
+            <div class="form-group">
+                <label>Location</label>
+                <select name="location" class="input">
+                    {% for loc in locations %}
+                    <option value="{{ loc }}" {% if item and item.location==loc %}selected{% endif %}>{{ loc }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Barcode</label>
+                <div style="display:flex;gap:0.5rem">
+                    <input type="text" name="barcode" id="barcode-input" class="input"
+                           value="{{ item.barcode if item else '' }}" placeholder="Scan or type barcode">
+                    <button type="button" class="btn-secondary" onclick="scanForForm()">
+                        <i class="fas fa-barcode"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Expiry Date</label>
+                <input type="date" name="expiry_date" class="input"
+                       value="{{ item.expiry_date if item else '' }}">
+            </div>
+        </div>
+        <button type="submit" class="btn-primary" style="width:100%;margin-top:1rem">
+            {{ 'Update Item' if item else 'Add Item' }}
+        </button>
+    </form>
+</div>
+
+<!-- Inline scanner for barcode field -->
+<div id="scanner-modal" class="modal hidden">
+    <div class="modal-box">
+        <h3>📷 Scan Barcode</h3>
+        <video id="scanner-video" autoplay playsinline></video>
+        <canvas id="scanner-canvas" hidden></canvas>
+        <p id="scan-result" class="scan-result">Point camera at barcode...</p>
+        <button class="btn-secondary" onclick="closeScanner()">Close</button>
+    </div>
+</div>
+<script src="{{ url_for('static', filename='js/scanner.js') }}"></script>
+<script>
+function scanForForm() {
+    window._scanTarget = 'form';
+    openScanner();
+}
+</script>
+{% endblock %}

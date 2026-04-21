@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Summary Card -->
+<div class="row mb-4">
+  <div class="col-md-4">
+    <div class="card total-card p-4">
+      <div class="fs-6 opacity-75">Total Expenses</div>
+      <div class="fs-2 fw-bold">₹{{ "%.2f"|format(total) }}</div>
+      <div class="opacity-75 mt-1">{{ expenses|length }} record(s)</div>
+    </div>
+  </div>
+  <div class="col-md-8">
+    <!-- Category Summary -->
+    <div class="card p-4 h-100">
+      <div class="fw-semibold mb-2 text-muted">By Category</div>
+      <div class="d-flex flex-wrap gap-2">
+        {% set cat_totals = {} %}
+        {% for e in expenses %}
+          {% if e.category in cat_totals %}
+            {% set _ = cat_totals.update({e.category: cat_totals[e.category] + e.amount}) %}
+          {% else %}
+            {% set _ = cat_totals.update({e.category: e.amount}) %}
+          {% endif %}
+        {% endfor %}
+        {% for cat, amt in cat_totals.items() %}
+          <span class="badge rounded-pill bg-primary px-3 py-2">{{ cat }}: ₹{{ "%.2f"|format(amt) }}</span>
+        {% endfor %}
+        {% if not cat_totals %}
+          <span class="text-muted">No data yet.</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="card p-3 mb-4">
+  <form method="get" class="row g-2 align-items-end">
+    <div class="col-md-4">
+      <label class="form-label text-muted small">Filter by Category</label>
+      <select name="category" class="form-select form-select-sm">
+        <option value="">All Categories</option>
+        {% for c in categories %}
+          <option value="{{ c.category }}" {% if c.category == selected_category %}selected{% endif %}>{{ c.category }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label text-muted small">Filter by Month</label>
+      <input type="month" name="month" class="form-control form-control-sm" value="{{ selected_month }}">
+    </div>
+    <div class="col-md-2">
+      <button class="btn btn-primary btn-sm w-100">Apply</button>
+    </div>
+    <div class="col-md-2">
+      <a href="/" class="btn btn-outline-secondary btn-sm w-100">Clear</a>
+    </div>
+  </form>
+</div>
+
+<!-- Expenses Table -->
+<div class="card">
+  <div class="card-body p-0">
+    {% if expenses %}
+    <table class="table table-hover mb-0 align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>#</th>
+          <th>Title</th>
+          <th>Category</th>
+          <th>Date</th>
+          <th>Note</th>
+          <th class="text-end">Amount</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in expenses %}
+        <tr>
+          <td class="text-muted small">{{ loop.index }}</td>
+          <td class="fw-semibold">{{ e.title }}</td>
+          <td><span class="badge rounded-pill bg-secondary">{{ e.category }}</span></td>
+          <td class="text-muted small">{{ e.date }}</td>
+          <td class="text-muted small">{{ e.note or "—" }}</td>
+          <td class="text-end fw-bold text-danger">₹{{ "%.2f"|format(e.amount) }}</td>
+          <td class="text-center">
+            <a href="/edit/{{ e.id }}" class="btn btn-sm btn-outline-primary me-1"><i class="bi bi-pencil"></i></a>
+            <a href="/delete/{{ e.id }}" class="btn btn-sm btn-outline-danger"
+               onclick="return confirm('Delete this expense?')"><i class="bi bi-trash"></i></a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot class="table-light">
+        <tr>
+          <td colspan="5" class="text-end fw-bold">Total</td>
+          <td class="text-end fw-bold text-danger">₹{{ "%.2f"|format(total) }}</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-inbox fs-1"></i>
+      <p class="mt-2">No expenses found. <a href="/add">Add one!</a></p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

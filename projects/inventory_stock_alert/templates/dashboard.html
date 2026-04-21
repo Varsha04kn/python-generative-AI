@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-header">
+    <h1>📊 Dashboard</h1>
+    <span class="subtitle">Welcome to SmartStock AI</span>
+</div>
+
+<!-- Stat Cards -->
+<div class="stats-grid">
+    <div class="stat-card blue">
+        <i class="fas fa-boxes"></i>
+        <div>
+            <h2>{{ total }}</h2>
+            <p>Total Items</p>
+        </div>
+    </div>
+    <div class="stat-card red">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div>
+            <h2>{{ low_stock|length }}</h2>
+            <p>Low Stock</p>
+        </div>
+    </div>
+    <div class="stat-card orange">
+        <i class="fas fa-clock"></i>
+        <div>
+            <h2>{{ expiring|length }}</h2>
+            <p>Expiring Soon</p>
+        </div>
+    </div>
+    <div class="stat-card purple">
+        <i class="fas fa-ban"></i>
+        <div>
+            <h2>{{ expired|length }}</h2>
+            <p>Expired</p>
+        </div>
+    </div>
+</div>
+
+<!-- Smart Alerts -->
+{% if alerts %}
+<div class="section-title">🔔 Smart Alerts</div>
+<div class="alerts-list">
+    {% for a in alerts[:5] %}
+    <div class="alert-card {{ a.type }}">
+        <span class="alert-icon">{{ a.icon }}</span>
+        <span>{{ a.msg|safe }}</span>
+        <a href="/item/edit/{{ a.item.id }}" class="btn-sm">Fix</a>
+    </div>
+    {% endfor %}
+    {% if alerts|length > 5 %}
+    <a href="/alerts" class="view-all">View all {{ alerts|length }} alerts →</a>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- Usage Chart -->
+<div class="section-title">📈 Weekly Usage</div>
+<div class="chart-card">
+    <canvas id="usageChart"></canvas>
+</div>
+
+<!-- Voice Assistant -->
+<div class="voice-card">
+    <div class="voice-header">
+        <i class="fas fa-microphone"></i>
+        <span>Voice Assistant</span>
+    </div>
+    <p class="voice-hint">Try: "Check stock of milk" or "Add 2 sugar"</p>
+    <div class="voice-controls">
+        <button class="btn-voice" onclick="startVoice()"><i class="fas fa-microphone"></i> Speak</button>
+        <span id="voice-status" class="voice-status">Ready</span>
+    </div>
+    <div id="voice-reply" class="voice-reply"></div>
+</div>
+
+<script>
+const labels = {{ chart_labels|safe }};
+const data   = {{ chart_data|safe }};
+new Chart(document.getElementById('usageChart'), {
+    type: 'line',
+    data: {
+        labels,
+        datasets: [{
+            label: 'Units Used',
+            data,
+            borderColor: '#6c63ff',
+            backgroundColor: 'rgba(108,99,255,0.15)',
+            tension: 0.4,
+            fill: true,
+            pointBackgroundColor: '#6c63ff'
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { labels: { color: 'var(--text)' } } },
+        scales: {
+            x: { ticks: { color: 'var(--text)' }, grid: { color: 'var(--border)' } },
+            y: { ticks: { color: 'var(--text)' }, grid: { color: 'var(--border)' } }
+        }
+    }
+});
+</script>
+{% endblock %}

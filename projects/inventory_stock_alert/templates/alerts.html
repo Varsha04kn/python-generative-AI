@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-header">
+    <h1>🔔 Smart Alerts</h1>
+</div>
+
+<!-- Email Alert Form -->
+<div class="form-card" style="margin-bottom:1.5rem;padding:1.2rem">
+    <form method="POST" action="/send-email-alert" style="display:flex;gap:0.8rem;align-items:center;flex-wrap:wrap">
+        <i class="fas fa-envelope" style="color:var(--primary)"></i>
+        <input type="email" name="email" class="input" placeholder="Send alerts to email..." style="flex:1;min-width:200px" required>
+        <button type="submit" class="btn-primary">Send Email Alert</button>
+    </form>
+</div>
+
+{% if alerts %}
+<div class="alerts-list">
+    {% for a in alerts %}
+    <div class="alert-card {{ a.type }}">
+        <span class="alert-icon">{{ a.icon }}</span>
+        <div class="alert-body">
+            <p>{{ a.msg|safe }}</p>
+            <small>📍 {{ a.item.location }} · {{ a.item.category }}</small>
+        </div>
+        <div class="alert-actions">
+            <a href="/item/edit/{{ a.item.id }}" class="btn-sm">Edit</a>
+            <a href="/reorder" class="btn-sm reorder">Reorder</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <i class="fas fa-check-circle"></i>
+    <p>All good! No alerts right now.</p>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-header">
+    <h1>📦 Inventory</h1>
+    <a href="/item/add" class="btn-primary"><i class="fas fa-plus"></i> Add Item</a>
+</div>
+
+<!-- Filters -->
+<div class="filter-bar">
+    <form method="GET" class="filter-form">
+        <input type="text" name="search" placeholder="🔍 Search items or barcode..." value="{{ search }}" class="input">
+        <select name="location" class="input">
+            <option value="All">All Locations</option>
+            {% for loc in locations %}
+            <option value="{{ loc }}" {% if selected_location==loc %}selected{% endif %}>{{ loc }}</option>
+            {% endfor %}
+        </select>
+        <select name="category" class="input">
+            <option value="All">All Categories</option>
+            {% for cat in categories %}
+            <option value="{{ cat }}" {% if selected_category==cat %}selected{% endif %}>{{ cat }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn-primary">Filter</button>
+    </form>
+    <button class="btn-secondary" onclick="openScanner()"><i class="fas fa-barcode"></i> Scan Barcode</button>
+</div>
+
+<!-- Barcode Scanner Modal -->
+<div id="scanner-modal" class="modal hidden">
+    <div class="modal-box">
+        <h3>📷 Barcode Scanner</h3>
+        <video id="scanner-video" autoplay playsinline></video>
+        <canvas id="scanner-canvas" hidden></canvas>
+        <p id="scan-result" class="scan-result">Point camera at barcode...</p>
+        <button class="btn-secondary" onclick="closeScanner()">Close</button>
+    </div>
+</div>
+
+<!-- Items Table -->
+<div class="table-card">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th><th>Category</th><th>Qty</th><th>Min</th>
+                <th>Location</th><th>Expiry</th><th>AI Prediction</th><th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for item in items %}
+        {% set days = predictions[item.id] %}
+        {% set exp_class = '' %}
+        {% if item.expiry_date %}
+            {% if item.expiry_date < today_str %}{% set exp_class = 'expired' %}
+            {% elif item.expiry_date <= soon_str %}{% set exp_class = 'expiring' %}
+            {% endif %}
+        {% endif %}
+        <tr class="{% if item.quantity <= item.min_stock %}row-low{% endif %}">
+            <td><b>{{ item.name }}</b></td>
+            <td><span class="tag">{{ item.category }}</span></td>
+            <td>{{ item.quantity }} {{ item.unit }}</td>
+            <td>{{ item.min_stock }}</td>
+            <td>{{ item.location }}</td>
+            <td class="{{ exp_class }}">{{ item.expiry_date or '—' }}</td>
+            <td>
+                {% if days %}
+                    <span class="{% if days <= 2 %}pred-danger{% elif days <= 5 %}pred-warn{% else %}pred-ok{% endif %}">
+                        ~{{ days }} days left
+                    </span>
+                {% else %}—{% endif %}
+            </td>
+            <td class="actions">
+                <form method="POST" action="/item/use/{{ item.id }}" style="display:inline">
+                    <input type="number" name="quantity" value="1" min="0.1" step="0.1" class="qty-input">
+                    <button type="submit" class="btn-use">Use</button>
+                </form>
+                <a href="/item/edit/{{ item.id }}" class="btn-edit"><i class="fas fa-edit"></i></a>
+                <form method="POST" action="/item/delete/{{ item.id }}" style="display:inline"
+                      onsubmit="return confirm('Delete this item?')">
+                    <button type="submit" class="btn-delete"><i class="fas fa-trash"></i></button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" style="text-align:center;padding:2rem">No items found.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script src="{{ url_for('static', filename='js/scanner.js') }}"></script>
+{% endblock %}

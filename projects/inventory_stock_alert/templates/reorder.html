@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-header">
+    <h1>🛒 Auto Reorder</h1>
+    <span class="subtitle">Items below minimum stock</span>
+</div>
+
+{% if reorder_list %}
+<div class="table-card">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Item</th><th>Category</th><th>Current Qty</th>
+                <th>Min Stock</th><th>AI: Days Left</th><th>Location</th><th>Reorder</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for r in reorder_list %}
+        <tr>
+            <td><b>{{ r.name }}</b></td>
+            <td><span class="tag">{{ r.category }}</span></td>
+            <td class="pred-danger">{{ r.quantity }} {{ r.unit }}</td>
+            <td>{{ r.min_stock }}</td>
+            <td>{% if r.days_left %}<span class="pred-danger">~{{ r.days_left }} days</span>{% else %}—{% endif %}</td>
+            <td>{{ r.location }}</td>
+            <td>
+                <form method="POST" action="/reorder/confirm" style="display:flex;gap:0.4rem;align-items:center">
+                    <input type="hidden" name="item_id" value="{{ r.id }}">
+                    <input type="number" name="qty" value="{{ r.suggested_qty }}" min="0.1" step="0.1" class="qty-input" style="width:70px">
+                    <span style="font-size:0.8rem;color:var(--text2)">{{ r.unit }}</span>
+                    <button type="submit" class="btn-primary" style="padding:0.3rem 0.8rem;font-size:0.85rem">
+                        Reorder Now
+                    </button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <i class="fas fa-check-circle"></i>
+    <p>All items are sufficiently stocked!</p>
+</div>
+{% endif %}
+{% endblock %}
